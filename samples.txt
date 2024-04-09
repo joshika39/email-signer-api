@@ -1,0 +1,11 @@
+{
+  "name": "ヘゲディス・ジョシュア",
+  "role": "開発者",
+  "email": "jhegedus9@gmail.com",
+  "latin_name": "Joshua Hegedus",
+  "latin_role": "Developer",
+  "password": "**** **** **** ****",
+  "cc": ["josh.hegedus@outlook.com", "benihegedis@gmail.com"],
+  "subject": "Congrats!!",
+  "message_body": "base64:PHA+RGVhciBSZWNpcGllbnQsPC9wPgo8cD5JIGFtIDxzdHJvbmc+aG9ub3JlZDwvc3Ryb25nPiB0byBsZXQgWW91IGtub3cgdGhhdCB0aGlzIGVtYWlsIHdhcyBkaWdpdGFsbHkgc2lnbmVkLjwvcD4KPHA+PGk+WW91IHdlcmUgc2VsZWN0ZWQsIGJlY2F1c2Ugd2UgaGF2ZSB5b3VyIGVtYWlsITwvaT48L3A+"
+}
