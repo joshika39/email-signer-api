@@ -27,7 +27,7 @@ body {
     border: 2px solid #ccc;
     border-radius: 10px;
     background: #f9f9f9;
-    position: relative;
+    position: relative !important;
 }
 
 .signature-container.not-verified #verified {
@@ -69,8 +69,8 @@ body {
 }
 
 img {
-    margin-bottom: 10px;
-    margin-top: 10px;
+    margin-bottom: 10px !important;
+    margin-top: 10px !important;
 }
 
 span.v-hr {
@@ -99,9 +99,9 @@ span.v-hr {
 }
 
 .sender {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
 }
 
 #verified {
@@ -119,22 +119,22 @@ span.v-hr {
 }
 
 a {
-    color: var(--primary-color);
+    color: var(--primary-color) !important;
     text-decoration: none;
     display: flex;
     align-items: center;
 }
 
 svg {
-    fill: var(--primary-color);
+    fill: var(--primary-color) !important;
     align-self: center;
 }
 
 /* Change color of img in a to primary */
 a img {
-    width: 20px;
-    height: 20px;
-    margin: 0;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
 }
 
 /* Change the svg fill if hovered on the anchor */
