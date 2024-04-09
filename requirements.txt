@@ -1,4 +1,5 @@
 pyperclip
 cryptography
-svglib
-beautifulsoup4
+fastapi
+pydantic
+uvicorn
