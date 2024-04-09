@@ -6,10 +6,24 @@ import sys
 import os
 from pydantic import BaseModel
 import base64
+from dotenv import load_dotenv
 
-path_root = Path(__file__).parents[1]
-sys.path.append(os.path.join(path_root))
-sys.path.append(os.path.join(path_root, 'backend'))
+load_dotenv()
+
+ENV = os.getenv("ENV", "development")
+
+if ENV == "development":
+    path_root = Path(__file__).parents[1]
+    sys.path.append(os.path.join(path_root))
+    sys.path.append(os.path.join(path_root, 'backend'))
+else:
+    print("Production")
+    print(os.getcwd())
+    print(os.path.dirname(__file__))
+    print(os.listdir('/'))
+    sys.path.append('/')
+    sys.path.append('/backend')
+
 
 from backend.signer import Signer, SignatureType, SMTPConfig, UserConfig, EmailConfig
 from backend.rsa import RSA, verify_by_base64_key
@@ -58,7 +72,7 @@ def verify_by_email(email: str, ps_message: str, ps_signature: str) -> bool:
 
 @router.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return { "message": "Hello World" }
 
 
 @router.get("/key")
