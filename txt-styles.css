@@ -7,12 +7,15 @@
     font-weight: bold;
     font-size: 18px;
     color: #000000;
+}
+
+.has-subtext {
     margin-bottom: 0;
 }
 
 /*  This is the latin type of the japanese name above
     It's italic and smaller and right belo the name-role */
-.name-role-lat {
+.subtext {
     font-style: italic;
     font-size: 14px;
     color: gray;
@@ -21,4 +24,29 @@
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--primary-color);
+}
+
+.logo {
+    display: block;
+    margin: 0 auto;
+}
+
+.visible-light {
+    display: block;
+}
+
+.visible-dark {
+    display: none;
+}
+
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .visible-dark {
+        display: block;
+    }
+
+    .visible-light {
+        display: none;
+    }
 }

@@ -1,11 +1,25 @@
+<meta charset="UTF-8">
 <link rel="stylesheet" href="txt-styles.css">
 <!-- STYLES -->
 
-<p class="name-role">{{ jp_name }}, {{ jp_role }}</p>
-<p class="name-role-lat">{{ name }}, {{ role }}<p>
+<p class="name-role has-subtext">{{ jp_name }}、{{ jp_role }}</p>
+<p class="subtext">{{ name }}, {{ role }}<p>
 
-<h2>Ablaze</h2>
+<a class="logo visible-light" href="https://ablaze.one">
+    <img src="https://assets.kou-gen.net/logo_dark.png" alt="Ablaze Logo">
+</a>
 
-<a href="https://ablaze.one">ablaze.one</a> | {{ email }} | Japan<br><br>
+<a class="logo visible-dark" href="https://ablaze.one">
+    <img src="https://assets.kou-gen.net/logo_light.png" alt="Ablaze Logo">
+</a>
 
-<a href="https://ablaze.one" title="{{ verified_title }}">This email was digitally signed</a>
+<p>{{ email }} | 日本 (Japan)</p>
+
+<a href="https://github.com/Ablaze-MIRAI/support">Support Us</a>
+<a href="https://github.com/Floorp-projects/Floorp">Check out Floorp!</a>
+
+<hr>
+
+<p class="has-subtext"><a href="https://ablaze.one" title="{{ verified_title }}">このメールはデジタル署名されました</a>
+</p>
+<p class="subtext">This email was digitally signed</p>
