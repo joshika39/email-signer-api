@@ -18,7 +18,6 @@ sys.path.append(os.path.join(path_root, 'backend'))
 
 from rsa import RSA
 
-rsa = RSA("jhegedus9@gmail.com")
 
 use_encryption = True
 
@@ -226,6 +225,7 @@ class Signer:
         self.__signature_file = signature_file
         self.__signature_type = signature_type
         self.__user = user
+        self.__rsa = RSA(user.email)
 
     def inject_rsa_signature(self, funny_quote: str = ""):
         """
@@ -235,7 +235,7 @@ class Signer:
         if use_encryption:
             mail_id = str(uuid4())
             data = f"{self.__user.email} {datetime.datetime.now()} {funny_quote}"
-            signature = rsa.create_signed_message(data)
+            signature = self.__rsa.create_signed_message(data)
             return {
                 'verified_title': signature,
                 'verified_href': mail_id,
@@ -330,8 +330,6 @@ class Signer:
             html_content = clean_up_html(signature.content)
             msg.attach(MIMEText(html_content, 'html'))
             print("Sending email...")
-            pyperclip.copy(html_content)
-            return ""
             recipients = email.combine_recipients()
             server.sendmail(self.__user.email, recipients, msg.as_string())
             print("Email sent successfully!")
