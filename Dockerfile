@@ -12,4 +12,8 @@ COPY backend/*.py .
 COPY backend/*.html .
 COPY backend/*.css .
 
+# The keys/ directory is mounted as a volume from the host
+# so that the keys are not stored in the image
+VOLUME /app/keys
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
