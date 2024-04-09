@@ -1,0 +1,24 @@
+:root {
+    --primary-color: #feae2a;
+    --secondary-color: #f95f12;
+}
+
+.name-role {
+    font-weight: bold;
+    font-size: 18px;
+    color: #000000;
+    margin-bottom: 0;
+}
+
+/*  This is the latin type of the japanese name above
+    It's italic and smaller and right belo the name-role */
+.name-role-lat {
+    font-style: italic;
+    font-size: 14px;
+    color: gray;
+    margin-top: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+}
