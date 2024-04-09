@@ -219,13 +219,15 @@ class Signer:
         user: UserConfig,
         smtp_config: SMTPConfig,
         signature_file: str,
-        signature_type: SignatureType = SignatureType.SIMPLE
+        self_url: str,
+        signature_type: SignatureType = SignatureType.SIMPLE,
     ):
         self.__smtp_config = smtp_config
         self.__signature_file = signature_file
         self.__signature_type = signature_type
         self.__user = user
         self.__rsa = RSA(user.email)
+        self.__self_url = self_url
 
     def inject_rsa_signature(self, funny_quote: str = ""):
         """
@@ -284,7 +286,8 @@ class Signer:
             "latin_name": self.__user.latin_name,
             "latin_role": self.__user.latin_role,
             'signature': verifications['verified_title'],
-            'message': verifications['data']
+            'message': verifications['data'],
+            'self_url': self.__self_url
         }
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)

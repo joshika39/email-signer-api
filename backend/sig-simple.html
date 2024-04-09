@@ -13,6 +13,6 @@
 
 <hr>
 
-<p class="has-subtext"><a href="http://localhost:1234/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}" title="{{ verified_title }}">このメールはデジタル署名されました</a>
+<p class="has-subtext"><a href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}" title="{{ verified_title }}">このメールはデジタル署名されました</a>
 </p>
-<p class="subtext">This email was digitally signed</p>
+<p class="subtext"><a href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}" title="{{ verified_title }}">This email is digitally signed</a>

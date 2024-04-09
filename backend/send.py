@@ -13,12 +13,16 @@ from signer import Signer, SignatureType, SMTPConfig, UserConfig, EmailConfig
 load_dotenv()
 
 PASSWORD = os.getenv('PASS')
+SELF_URL = os.getenv('SELF_URL')
+
+if not SELF_URL:
+    raise ValueError('SELF_URL not found in .env file')
 
 print(f'Password: {PASSWORD}')
 
 
 def convert_to_base64(message: str):
-    return f'base64:{base64.b64encode(message.encode()).decode('utf-8')}'
+    return f'base64:{base64.b64encode(message.encode()).decode("utf-8")}'
 
 
 user_config = UserConfig(
@@ -41,7 +45,8 @@ signer = Signer(
     user_config,
     SMTPConfig(),
     os.path.join('backend', 'email.html'),
-    SignatureType.SIMPLE
+    SignatureType.SIMPLE,
+    SELF_URL
 )
 
 signer.send_email(email)
