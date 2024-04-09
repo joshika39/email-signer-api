@@ -1,0 +1,206 @@
+:root {
+    --primary-color: #feae2a;
+    --secondary-color: #f95f12;
+    --link-visited-color: #f3480d;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.signature-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    background: #f9f9f9;
+    position: relative;
+}
+
+.signature-container.not-verified #verified {
+    display: none;
+}
+
+.signature-container.verified #verified {
+    display: block;
+}
+
+.name-role {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.details {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.separator {
+    width: 100%;
+    height: 1px;
+    margin: 10px 0;
+}
+
+/* Light Mode */
+.visible-dark {
+    display: none;
+}
+
+.visible-light {
+    display: block;
+}
+
+.separator {
+    background-color: #606060; /* Light mode separator color */
+}
+
+img {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+span.v-hr {
+    display: inline-block;
+    width: 2px;
+    height: 25px;
+    background-color: #000;
+    margin: 0 10px;
+}
+
+.name-role,
+.details {
+    color: #000; /* Light mode text color */
+}
+
+.details-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sender {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#verified {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 0 auto;
+    display: block;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+svg {
+    fill: var(--primary-color);
+    align-self: center;
+}
+
+/* Change color of img in a to primary */
+a img {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+
+/* Change the svg fill if hovered on the anchor */
+a:hover svg {
+    fill: var(--secondary-color);
+}
+
+a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+a:hover img.hoverable {
+    filter: brightness(0.7); /* Adjust the value to darken the image */
+}
+
+a:visited {
+    color: var(--link-visited-color);
+}
+
+a:visited svg {
+    fill: var(--link-visited-color);
+}
+
+a:visited img {
+    filter: invert(0.5);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .visible-dark {
+        display: block;
+    }
+
+    .visible-light {
+        display: none;
+    }
+
+    .separator {
+        background-color: #c1c1c1; /* Dark mode separator color */
+    }
+
+    .name-role,
+    .details {
+        color: #fff; /* Dark mode text color */
+    }
+
+    .signature-container {
+        background: #333; /* Dark mode background color */
+    }
+
+    span.v-hr {
+        background-color: #fff;
+    }
+
+    a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    a:visited {
+        color: var(--link-visited-color);
+    }
+}
