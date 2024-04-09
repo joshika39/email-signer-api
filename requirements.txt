@@ -1,0 +1,4 @@
+pyperclip
+cryptography
+svglib
+beautifulsoup4
