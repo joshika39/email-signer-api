@@ -53,6 +53,17 @@ def convert_links_to_images(html_content):
     return str(soup)
 
 
+def clean_up_html(html_content):
+    print("Cleaning up HTML content...")
+    remove_strings = [
+        '<link rel="stylesheet" href="txt-styles.css">',
+    ]
+    for remove_string in remove_strings:
+        html_content = html_content.replace(remove_string, "")
+
+    return html_content
+
+
 def create_fields(name: str, email: str, role: str, **kwargs):
     fields = {
         'main_name': name,
@@ -64,13 +75,18 @@ def create_fields(name: str, email: str, role: str, **kwargs):
     return fields
 
 
-def fill_template(template, **kwargs):
+def fill_template_str(template, start_tag='{{', end_tag='}}', **kwargs):
+    content = template
+    for key, value in kwargs.items():
+        content = content.replace(f"{start_tag} {key} {end_tag}", value)
+    return content
+
+
+def fill_template_file(template, start_tag='{{', end_tag='}}', **kwargs):
     with open(template, 'r') as f:
         content = f.read()
-    for key, value in kwargs.items():
-        content = content.replace(f"{{{{ {key} }}}}", value)
 
-    return content
+    return fill_template_str(content, start_tag, end_tag, **kwargs)
 
 
 def substitute_css_colors(css_string: str):
@@ -108,7 +124,10 @@ def combine_template_with_styles(template: str, styles: list):
 
     styles_str = substitute_css_colors(styles_str)
     styles_str = f"<style>\n{styles_str}\n</style>"
-    return template.replace("<!-- STYLES -->", styles_str)
+    obj = {
+        'STYLES': styles_str
+    }
+    return fill_template_str(template, **obj, start_tag='<!--', end_tag='-->')
 
 
 class SMTPConfig:
@@ -125,12 +144,16 @@ class SMTPConfig:
 
 
 class SignatureType(Enum):
-    HTML = 1
-    TEXT = 2
+    COMPLEX = 1
+    SIMPLE = 2
 
 
 def is_message_body_base64(message_body: str):
     return message_body.startswith("base64:")
+
+
+def get_signature_ps_element(data: str):
+    return f'<p><i>This was used to sign the email: <u>{data}</u></i></p>'
 
 
 class EmailConfig:
@@ -197,7 +220,7 @@ class Signer:
         user: UserConfig,
         smtp_config: SMTPConfig,
         signature_file: str,
-        signature_type: SignatureType = SignatureType.HTML
+        signature_type: SignatureType = SignatureType.SIMPLE
     ):
         self.__smtp_config = smtp_config
         self.__signature_file = signature_file
@@ -227,31 +250,48 @@ class Signer:
                 'data': ''
             }
 
-    def __generate_html_signature(self) -> Signature:
+    def __generate_complex_signature(self, body: str) -> Signature:
         verifications = self.inject_rsa_signature("I'm a developer.")
+
+        obj = {
+            'EMAIL_CONTENT': body,
+            'PS': get_signature_ps_element(verifications['data'])
+        }
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
-        template = fill_template(self.__signature_file, **all_fields)
+        all_fields.update(obj)
+        template = fill_template_file(self.__signature_file, **all_fields)
         template = convert_links_to_images(template)
         template = combine_template_with_styles(template, [os.path.join('backend', 'styles.css')])
 
-        pyperclip.copy(template)
         return Signature(template, verifications['data'])
 
-    def __generate_text_signature(self) -> Signature:
+    def __generate_simple_signature(self, body: str) -> Signature:
         verifications = self.inject_rsa_signature("I'm a developer.")
+        simple_template = os.path.join('backend', 'sig-simple.html')
+        with open(simple_template, 'r') as f:
+            simple_template_content = f.read()
+
+        email_structure = {
+            'EMAIL_CONTENT': body,
+            'PS': get_signature_ps_element(verifications['data']),
+            'SIGNATURE': simple_template_content
+        }
+
+        template = fill_template_file(self.__signature_file, **email_structure, start_tag='<!--', end_tag='-->')
+
         misc_fields = {
             "latin_name": self.__user.latin_name,
             "latin_role": self.__user.latin_role,
+            'signature': verifications['verified_title'],
+            'message': verifications['data']
         }
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
         all_fields.update(misc_fields)
-        text_signature = fill_template(self.__signature_file, **all_fields)
+        text_signature = fill_template_str(template, **all_fields)
         text_signature = combine_template_with_styles(text_signature, [os.path.join('backend', 'txt-styles.css')])
 
-        pyperclip.copy(text_signature)
-        print(text_signature)
         return Signature(text_signature, verifications['data'])
 
     def send_email(self, email: EmailConfig) -> str | None:
@@ -282,20 +322,16 @@ class Signer:
             else:
                 msg['Bcc'] = ""
 
-            if self.__signature_type == SignatureType.HTML:
-                signature = self.__generate_html_signature()
+            if self.__signature_type == SignatureType.COMPLEX:
+                signature = self.__generate_complex_signature(email.message_body)
             else:
-                signature = self.__generate_text_signature()
+                signature = self.__generate_simple_signature(email.message_body)
 
-            signed_content = signature.signed_content
-            ps_text = f"<i>The following message was signed: <strong>{signed_content}</strong></i>"
-
-            message_body = f'{email.message_body}<br><br>{ps_text}'
-            message_body = f'{message_body}<br><br>--{signature.content}'
-
-            msg.attach(MIMEText(message_body, 'html'))
-
+            html_content = clean_up_html(signature.content)
+            msg.attach(MIMEText(html_content, 'html'))
             print("Sending email...")
+            pyperclip.copy(html_content)
+            return ""
             recipients = email.combine_recipients()
             server.sendmail(self.__user.email, recipients, msg.as_string())
             print("Email sent successfully!")

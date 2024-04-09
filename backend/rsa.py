@@ -2,6 +2,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 import os
+import base64
 
 
 def get_secret_key_path(email: str):
@@ -11,6 +12,28 @@ def get_secret_key_path(email: str):
     if not os.path.exists(secret_key_path):
         os.makedirs(os.path.dirname(secret_key_path), exist_ok=True)
     return secret_key_path
+
+
+def verify_by_base64_key(base64_key: str, ps_message: str, ps_signature: str) -> bool:
+    public_key = serialization.load_pem_public_key(
+        base64.b64decode(base64_key),
+        backend=default_backend()
+    )
+    signature = bytes.fromhex(ps_signature)
+    message = ps_message.encode()
+    try:
+        public_key.verify(
+            signature,
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except:
+        return False
 
 
 class RSA:
