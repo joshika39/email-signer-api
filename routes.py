@@ -98,33 +98,47 @@ def verify_email(verify_model: EmailVerifyModel):
 
 @router.get("/verify/email")
 def verify_email_get_japanese(email: str, ps_message: str, ps_signature: str):
-    result = verify_by_email(email, ps_message, ps_signature)
-    if result:
+    try:
+        result = verify_by_email(email, ps_message, ps_signature)
+        if result:
+            return {
+                "email": email,
+                "ps_message": ps_message,
+                "signature": {
+                    'status': 'valid',
+                    "ps": ps_signature,
+                },
+                "comment": {
+                    "jp": "この電子メールは正しいです。",
+                    "en": "This email is valid."
+                }
+            }
+
         return {
             "email": email,
             "ps_message": ps_message,
             "signature": {
-                'status': 'valid',
+                'status': 'invalid',
                 "ps": ps_signature,
             },
             "comment": {
-                "jp": "この電子メールは正しいです。",
-                "en": "This email is valid."
+                "jp": "この電子メールは無効です。",
+                "en": "This email is invalid."
             }
         }
-
-    return {
-        "email": email,
-        "ps_message": ps_message,
-        "signature": {
-            'status': 'invalid',
-            "ps": ps_signature,
-        },
-        "comment": {
-            "jp": "この電子メールは無効です。",
-            "en": "This email is invalid."
+    except Exception as e:
+        return {
+            "email": email,
+            "ps_message": ps_message,
+            "signature": {
+                'status': 'error',
+                "ps": ps_signature,
+            },
+            "comment": {
+                "jp": "エラーが発生しました。" + str(e),
+                "en": "An error occurred: " + str(e)
+            }
         }
-    }
 
 
 
