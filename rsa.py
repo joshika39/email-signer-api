@@ -2,13 +2,20 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 import os
-import base64
 
-private_key_path = "secret.pem"
-public_key_path = "public.pem"
+
+def get_secret_key_path(email: str):
+    sender_email = email.replace("@", "").replace(".", "")
+    filename = f"{sender_email}.pem"
+    secret_key_path = os.path.join("keys", "private", filename)
+    if not os.path.exists(secret_key_path):
+        os.makedirs(os.path.dirname(secret_key_path), exist_ok=True)
+    return secret_key_path
+
 
 class RSA:
-    def __init__(self):
+    def __init__(self, sender_email: str):
+        private_key_path = get_secret_key_path(sender_email)
         if os.path.exists(private_key_path):
             print("Loading private key from file")
             with open(private_key_path, "rb") as f:
@@ -46,7 +53,7 @@ class RSA:
             ),
             hashes.SHA256()
         )
-        
+
     def verify_raw(self, signature: bytes, message: bytes):
         return self.__public_key.verify(
             signature,
@@ -79,16 +86,15 @@ class RSA:
             )
         )
         b64_encrypted = encrypted.hex()
-        return b64_encrypted 
+        return b64_encrypted
 
     def create_signed_message(self, message: str) -> str:
         signature = self.sign(message)
-        
+
         signature_base64 = signature.hex()
         signed_message = f"{signature_base64}"
-        
-        return signed_message
 
+        return signed_message
 
     def __get_public_key(self):
         return self.__public_key.public_bytes(
