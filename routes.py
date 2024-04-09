@@ -5,19 +5,26 @@ from pathlib import Path
 import sys
 import os
 from pydantic import BaseModel
+import base64
 
 path_root = Path(__file__).parents[1]
 sys.path.append(os.path.join(path_root))
 sys.path.append(os.path.join(path_root, 'backend'))
 
 from backend.signer import Signer, SignatureType, SMTPConfig, UserConfig, EmailConfig
-from backend.rsa import RSA
+from backend.rsa import RSA, verify_by_base64_key
 
 router = APIRouter()
 
 
-class VerifyModel(BaseModel):
+class EmailVerifyModel(BaseModel):
     email: str
+    ps_message: str
+    ps_signature: str
+
+
+class KeyVerifyModel(BaseModel):
+    base64_key: str
     ps_message: str
     ps_signature: str
 
@@ -36,29 +43,57 @@ class SendModel(BaseModel):
     message_body: str
 
 
-@router.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@router.post("/verify")
-def verify_email(verify_model: VerifyModel):
-    rsa = RSA(verify_model.email)
-    signature = bytes.fromhex(verify_model.ps_signature)
-    message = verify_model.ps_message.encode()
-    result = rsa.verify_raw(signature, message)
-    if result:
-        return {"verified": True}
-
-    return {"verified": False}
-
-
 def convert_recipients(recipients):
     if isinstance(recipients, str):
         return [recipients]
     elif isinstance(recipients, list):
         return recipients
     return None
+
+
+def verify_by_email(email: str, ps_message: str, ps_signature: str) -> bool:
+    rsa = RSA(email)
+    return rsa.verify(ps_signature, ps_message)
+
+
+@router.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@router.get("/key")
+def get_public_key(user_email: str):
+    rsa = RSA(user_email)
+    key_str = rsa.get_public_key()
+    base64_str = base64.b64encode(key_str).decode()
+    return {"public_key": base64_str}
+
+
+@router.post("/verify/email")
+def verify_email(verify_model: EmailVerifyModel):
+    result = verify_by_email(verify_model.email, verify_model.ps_message, verify_model.ps_signature)
+    if result:
+        return {"verified": True}
+
+    return {"verified": False}
+
+
+@router.get("/verify/email")
+def verify_email_get(email: str, ps_message: str, ps_signature: str):
+    result = verify_by_email(email, ps_message, ps_signature)
+    if result:
+        return {"verified": True}
+
+    return {"verified": False}
+
+
+@router.post("/verify/key")
+def verify_key(verify_model: KeyVerifyModel):
+    result = verify_by_base64_key(verify_model.base64_key, verify_model.ps_message, verify_model.ps_signature)
+    if result:
+        return {"verified": True}
+
+    return {"verified": False}
 
 
 @router.post("/send/{provider}")
@@ -95,8 +130,8 @@ def send_email(provider: str, send_model: SendModel):
     signer = Signer(
         user_config,
         smp_config,
-        os.path.join('backend', 'signature.txt.html'),
-        SignatureType.TEXT
+        os.path.join('backend', 'email.html'),
+        SignatureType.SIMPLE
     )
 
     result = signer.send_email(email_config)
