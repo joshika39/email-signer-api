@@ -163,6 +163,16 @@ class EmailConfig:
     def get_bcc_string(self):
         return ','.join(self.bcc) if self.bcc else None
 
+    def combine_recipients(self):
+        all_recipients = []
+        if self.recipients:
+            all_recipients += self.recipients
+        if self.cc:
+            all_recipients += self.cc
+        if self.bcc:
+            all_recipients += self.bcc
+        return all_recipients
+
 
 class UserConfig:
     def __init__(self, name: str, email: str, password: str, role: str, latin_name: str, latin_role: str, **kwargs):
@@ -173,6 +183,12 @@ class UserConfig:
         self.role = role
         self.latin_role = latin_role
         self.__dict__.update(kwargs)
+
+
+class Signature:
+    def __init__(self, content: str, signed_content: str):
+        self.content = content
+        self.signed_content = signed_content
 
 
 class Signer:
@@ -211,7 +227,7 @@ class Signer:
                 'data': ''
             }
 
-    def __generate_html_signature(self):
+    def __generate_html_signature(self) -> Signature:
         verifications = self.inject_rsa_signature("I'm a developer.")
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
@@ -220,9 +236,9 @@ class Signer:
         template = combine_template_with_styles(template, [os.path.join('backend', 'styles.css')])
 
         pyperclip.copy(template)
-        return template
+        return Signature(template, verifications['data'])
 
-    def __generate_text_signature(self):
+    def __generate_text_signature(self) -> Signature:
         verifications = self.inject_rsa_signature("I'm a developer.")
         misc_fields = {
             "latin_name": self.__user.latin_name,
@@ -236,7 +252,7 @@ class Signer:
 
         pyperclip.copy(text_signature)
         print(text_signature)
-        return text_signature
+        return Signature(text_signature, verifications['data'])
 
     def send_email(self, email: EmailConfig) -> str | None:
         try:
@@ -271,12 +287,16 @@ class Signer:
             else:
                 signature = self.__generate_text_signature()
 
-            message_body = f'{email.message_body}<br><br>--<br>{signature}'
+            signed_content = signature.signed_content
+            ps_text = f"<i>The following message was signed: <strong>{signed_content}</strong></i>"
+
+            message_body = f'{email.message_body}<br><br>{ps_text}'
+            message_body = f'{message_body}<br><br>--{signature.content}'
 
             msg.attach(MIMEText(message_body, 'html'))
 
             print("Sending email...")
-            recipients = email.recipients + email.cc + email.bcc
+            recipients = email.combine_recipients()
             server.sendmail(self.__user.email, recipients, msg.as_string())
             print("Email sent successfully!")
         except Exception as e:
