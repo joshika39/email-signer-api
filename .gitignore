@@ -8,4 +8,6 @@ test.py
 
 .DS_Store
 
+.env
+
 
