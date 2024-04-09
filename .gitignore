@@ -3,7 +3,7 @@ venv/
 __pycache__/*
 *.pem
 
-test.html
+backend/test.html
 test.py
 
 .DS_Store
