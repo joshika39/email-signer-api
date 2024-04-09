@@ -11,6 +11,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ENV = os.getenv("ENV", "development")
+SELF_URL = os.getenv('SELF_URL')
+
+if not SELF_URL:
+    raise ValueError('SELF_URL not found in .env file')
 
 if ENV == "development":
     path_root = Path(__file__).parents[1]
@@ -93,12 +97,35 @@ def verify_email(verify_model: EmailVerifyModel):
 
 
 @router.get("/verify/email")
-def verify_email_get(email: str, ps_message: str, ps_signature: str):
+def verify_email_get_japanese(email: str, ps_message: str, ps_signature: str):
     result = verify_by_email(email, ps_message, ps_signature)
     if result:
-        return {"verified": True}
+        return {
+            "email": email,
+            "ps_message": ps_message,
+            "signature": {
+                'status': 'valid',
+                "ps": ps_signature,
+            },
+            "comment": {
+                "jp": "この電子メールは正しいです。",
+                "en": "This email is valid."
+            }
+        }
 
-    return {"verified": False}
+    return {
+        "email": email,
+        "ps_message": ps_message,
+        "signature": {
+            'status': 'invalid',
+            "ps": ps_signature,
+        },
+        "comment": {
+            "jp": "この電子メールは無効です。",
+            "en": "This email is invalid."
+        }
+    }
+
 
 
 @router.post("/verify/key")
@@ -145,6 +172,7 @@ def send_email(provider: str, send_model: SendModel):
         user_config,
         smp_config,
         os.path.join('backend', 'email.html'),
+        SELF_URL,
         SignatureType.SIMPLE
     )
 
