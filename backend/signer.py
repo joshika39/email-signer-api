@@ -1,12 +1,13 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText 
+from email.mime.text import MIMEText
 import pyperclip
 import re
 import datetime
 import os
 from uuid import uuid4
 from bs4 import BeautifulSoup
+import base64
 from pathlib import Path
 import sys
 from enum import Enum
@@ -16,15 +17,17 @@ sys.path.append(os.path.join(path_root))
 sys.path.append(os.path.join(path_root, 'backend'))
 
 from rsa import RSA
+
 rsa = RSA("jhegedus9@gmail.com")
 
 use_encryption = True
+
 
 def convert_links_to_images(html_content):
     print("Converting links to images...")
     soup = BeautifulSoup(html_content, 'html.parser')
     links_to_convert = soup.find_all('a', class_='convert-to-image')
-  
+
     for link in links_to_convert:
         sub_soup = BeautifulSoup(str(link), 'html.parser')
         svg_tags = sub_soup.find_all('svg')
@@ -36,7 +39,7 @@ def convert_links_to_images(html_content):
             print(f"Converting {svg_id} to image...")
 
             img_path = f'assets/{svg_id}-base64.txt'
-            base64_string = ""
+
             if os.path.exists(img_path):
                 with open(img_path, 'r') as f:
                     base64_string = f.read()
@@ -52,9 +55,9 @@ def convert_links_to_images(html_content):
 
 def create_fields(name: str, email: str, role: str, **kwargs):
     fields = {
-        'name': name,
+        'main_name': name,
         'email': email,
-        'role': role
+        'main_role': role
     }
     for key, value in kwargs.items():
         fields[key] = value
@@ -66,7 +69,7 @@ def fill_template(template, **kwargs):
         content = f.read()
     for key, value in kwargs.items():
         content = content.replace(f"{{{{ {key} }}}}", value)
-    
+
     return content
 
 
@@ -126,13 +129,64 @@ class SignatureType(Enum):
     TEXT = 2
 
 
+def is_message_body_base64(message_body: str):
+    return message_body.startswith("base64:")
+
+
+class EmailConfig:
+    def __init__(
+        self,
+        subject: str,
+        message_body: str,
+        recipients: list[str] = None,
+        cc: list[str] = None,
+        bcc: list[str] = None
+    ):
+        self.subject = subject
+        self.recipients = recipients
+        self.cc = cc
+        self.bcc = bcc
+        if is_message_body_base64(message_body):
+            self.message_body = base64.b64decode(message_body.replace("base64:","")).decode('utf-8')
+        else:
+            self.message_body = message_body
+
+    def is_valid(self):
+        return self.subject and self.message_body and (self.recipients or self.cc or self.bcc)
+
+    def get_recipients_string(self):
+        return ','.join(self.recipients) if self.recipients else None
+
+    def get_cc_string(self):
+        return ','.join(self.cc) if self.cc else None
+
+    def get_bcc_string(self):
+        return ','.join(self.bcc) if self.bcc else None
+
+
+class UserConfig:
+    def __init__(self, name: str, email: str, password: str, role: str, latin_name: str, latin_role: str, **kwargs):
+        self.name = name
+        self.email = email
+        self.password = password
+        self.latin_name = latin_name
+        self.role = role
+        self.latin_role = latin_role
+        self.__dict__.update(kwargs)
+
+
 class Signer:
-    def __init__(self, sender_email: str, sender_password: str, smtp_config: SMTPConfig, signature_file: str, signature_type: SignatureType = SignatureType.HTML):
-        self.__sender_email = sender_email
-        self.__sender_password = sender_password
+    def __init__(
+        self,
+        user: UserConfig,
+        smtp_config: SMTPConfig,
+        signature_file: str,
+        signature_type: SignatureType = SignatureType.HTML
+    ):
         self.__smtp_config = smtp_config
         self.__signature_file = signature_file
         self.__signature_type = signature_type
+        self.__user = user
 
     def inject_rsa_signature(self, funny_quote: str = ""):
         """
@@ -140,12 +194,12 @@ class Signer:
         """
 
         if use_encryption:
-            id = str(uuid4())
-            data = f"{self.__sender_email} {datetime.datetime.now()} {funny_quote}"
+            mail_id = str(uuid4())
+            data = f"{self.__user.email} {datetime.datetime.now()} {funny_quote}"
             signature = rsa.create_signed_message(data)
             return {
                 'verified_title': signature,
-                'verified_href': id,
+                'verified_href': mail_id,
                 'verified': '.verified',
                 'data': data
             }
@@ -157,32 +211,24 @@ class Signer:
                 'data': ''
             }
 
-    def __generate_html_signature(self, signature_file: str):
-        with open(signature_file, 'r') as f:
-            html_signature = f.read()
-
+    def __generate_html_signature(self):
         verifications = self.inject_rsa_signature("I'm a developer.")
-        all_fields = create_fields('Joshua Hegedus', 'josh.hegedus@outlook.com', 'Developer')
+        all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
-        html_signature = fill_template(self.__signature_file, **all_fields)
-        html_signature = convert_links_to_images(html_signature)
-        html_signature = combine_template_with_styles(html_signature, [os.path.join('backend', 'styles.css')])
+        template = fill_template(self.__signature_file, **all_fields)
+        template = convert_links_to_images(template)
+        template = combine_template_with_styles(template, [os.path.join('backend', 'styles.css')])
 
-        pyperclip.copy(html_signature)
-        return html_signature
+        pyperclip.copy(template)
+        return template
 
-    def __generate_text_signature(self, signature_file: str):
-        with open(signature_file, 'r') as f:
-            text_signature = f.read()
-
-        # Replace '\n' with '<br>
-        # text_signature = text_signature.replace('\n', '<br>\n')
+    def __generate_text_signature(self):
         verifications = self.inject_rsa_signature("I'm a developer.")
         misc_fields = {
-            "jp_name": "ヘゲティス・ジョシュア",
-            "jp_role": "開発者",
+            "latin_name": self.__user.latin_name,
+            "latin_role": self.__user.latin_role,
         }
-        all_fields = create_fields('Joshua Hegedus', 'josh.hegedus@outlook.com', 'Developer')
+        all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
         all_fields.update(misc_fields)
         text_signature = fill_template(self.__signature_file, **all_fields)
@@ -192,31 +238,46 @@ class Signer:
         print(text_signature)
         return text_signature
 
-    def send_email(self, recipient_email, subject, message_body) -> str | None:
+    def send_email(self, email: EmailConfig) -> str | None:
         try:
             server = self.__smtp_config.get_smtp_server()
         except Exception as e:
             print(f"Failed to connect to SMTP server. Error: {str(e)}")
-            return
-        
-        try:
-            server.login(self.__sender_email, self.__sender_password)
-            msg = MIMEMultipart('alternative')
-            msg['From'] = self.__sender_email
-            msg['To'] = recipient_email
-            msg['Subject'] = subject
-            
-            if self.__signature_type == SignatureType.HTML:
-                signature = self.__generate_html_signature(self.__signature_file)
-            else:
-                signature = self.__generate_text_signature(self.__signature_file)
+            return str(e)
 
-            message_body = f'{message_body}<br><br>--<br>{signature}'
+        try:
+            server.login(self.__user.email, self.__user.password)
+            msg = MIMEMultipart('alternative')
+            msg['From'] = self.__user.email
+            msg['Subject'] = email.subject
+
+            if email.recipients:
+                msg['To'] = email.get_recipients_string()
+            else:
+                msg['To'] = ""
+
+            if email.cc:
+                msg['Cc'] = email.get_cc_string()
+            else:
+                msg['Cc'] = ""
+
+            if email.bcc:
+                msg['Bcc'] = email.get_bcc_string()
+            else:
+                msg['Bcc'] = ""
+
+            if self.__signature_type == SignatureType.HTML:
+                signature = self.__generate_html_signature()
+            else:
+                signature = self.__generate_text_signature()
+
+            message_body = f'{email.message_body}<br><br>--<br>{signature}'
 
             msg.attach(MIMEText(message_body, 'html'))
 
             print("Sending email...")
-            server.sendmail(self.__sender_email, recipient_email, msg.as_string())
+            recipients = email.recipients + email.cc + email.bcc
+            server.sendmail(self.__user.email, recipients, msg.as_string())
             print("Email sent successfully!")
         except Exception as e:
             print(f"Failed to send email. Error: {str(e)}")
