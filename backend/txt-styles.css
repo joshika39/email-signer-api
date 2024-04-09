@@ -29,6 +29,7 @@ h1, h2, h3, h4, h5, h6 {
 .logo {
     display: block;
     margin: 0 auto;
+    background: #f8f9fa;
 }
 
 .visible-light {
