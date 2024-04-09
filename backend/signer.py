@@ -13,7 +13,7 @@ from enum import Enum
 
 path_root = Path(__file__).parents[1]
 sys.path.append(os.path.join(path_root))
-sys.path.append(os.path.join(path_root, 'email'))
+sys.path.append(os.path.join(path_root, 'backend'))
 
 from rsa import RSA
 rsa = RSA("jhegedus9@gmail.com")
@@ -49,6 +49,7 @@ def convert_links_to_images(html_content):
 
     return str(soup)
 
+
 def create_fields(name: str, email: str, role: str, **kwargs):
     fields = {
         'name': name,
@@ -59,6 +60,7 @@ def create_fields(name: str, email: str, role: str, **kwargs):
         fields[key] = value
     return fields
 
+
 def fill_template(template, **kwargs):
     with open(template, 'r') as f:
         content = f.read()
@@ -66,6 +68,7 @@ def fill_template(template, **kwargs):
         content = content.replace(f"{{{{ {key} }}}}", value)
     
     return content
+
 
 def substitute_css_colors(css_string: str):
     """
@@ -122,6 +125,7 @@ class SignatureType(Enum):
     HTML = 1
     TEXT = 2
 
+
 class Signer:
     def __init__(self, sender_email: str, sender_password: str, smtp_config: SMTPConfig, signature_file: str, signature_type: SignatureType = SignatureType.HTML):
         self.__sender_email = sender_email
@@ -162,7 +166,7 @@ class Signer:
         all_fields.update(verifications)
         html_signature = fill_template(self.__signature_file, **all_fields)
         html_signature = convert_links_to_images(html_signature)
-        html_signature = combine_template_with_styles(html_signature, ['styles.css'])
+        html_signature = combine_template_with_styles(html_signature, [os.path.join('backend', 'styles.css')])
 
         pyperclip.copy(html_signature)
         return html_signature
@@ -182,13 +186,13 @@ class Signer:
         all_fields.update(verifications)
         all_fields.update(misc_fields)
         text_signature = fill_template(self.__signature_file, **all_fields)
-        text_signature = combine_template_with_styles(text_signature, ['txt-styles.css'])
+        text_signature = combine_template_with_styles(text_signature, [os.path.join('backend', 'txt-styles.css')])
 
         pyperclip.copy(text_signature)
         print(text_signature)
         return text_signature
 
-    def send_email(self, recipient_email, subject, message_body):
+    def send_email(self, recipient_email, subject, message_body) -> str | None:
         try:
             server = self.__smtp_config.get_smtp_server()
         except Exception as e:
@@ -216,6 +220,7 @@ class Signer:
             print("Email sent successfully!")
         except Exception as e:
             print(f"Failed to send email. Error: {str(e)}")
+            return str(e)
         finally:
             # Close the connection to the SMTP server
             server.quit()

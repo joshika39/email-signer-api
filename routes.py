@@ -6,10 +6,10 @@ from pydantic import BaseModel
 
 path_root = Path(__file__).parents[1]
 sys.path.append(os.path.join(path_root))
-sys.path.append(os.path.join(path_root, 'email'))
+sys.path.append(os.path.join(path_root, 'backend'))
 
-from email.signer import Signer, SignatureType, SMTPConfig
-from email.rsa import RSA
+from backend.signer import Signer, SignatureType, SMTPConfig
+from backend.rsa import RSA
 
 router = APIRouter()
 
@@ -45,16 +45,23 @@ def verify_email(verify_model: VerifyModel):
     return {"verified": False}
 
 
-@router.post("/send")
-def send_email(send_model: SendModel):
+@router.post("/send/{provider}")
+def send_email(provider: str, send_model: SendModel):
+    if provider not in ['gmail', 'outlook']:
+        return {"error": "Invalid provider"}
+    server = 'smtp.gmail.com' if provider == 'gmail' else 'smtp.office365.com'
     sender_email = send_model.sender_email
     sender_password = send_model.sender_password
     recipient_email = send_model.recipient_email
     subject = send_model.subject
     message_body = send_model.message_body
 
-    smp_config = SMTPConfig('smtp.gmail.com', 587)
-    signer = Signer(sender_email, sender_password, smp_config, 'signature.txt.html', SignatureType.TEXT)
+    smp_config = SMTPConfig(server, 587)
+    signer = Signer(sender_email, sender_password, smp_config, os.path.join('backend', 'signature.txt.html'),
+                    SignatureType.TEXT)
 
-    signer.send_email(recipient_email, subject, message_body)
-    return {"sent": True}
+    result = signer.send_email(recipient_email, subject, message_body)
+    if result is None:
+        return {"sent": True}
+
+    return {"sent": False, "error": result}
