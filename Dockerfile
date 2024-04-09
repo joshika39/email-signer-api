@@ -8,9 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 COPY routes.py .
-COPY backend/*.py .
-COPY backend/*.html .
-COPY backend/*.css .
+COPY backend/*.py backend/
+COPY backend/*.html backend/
+COPY backend/*.css backend/
 
 # The keys/ directory is mounted as a volume from the host
 # so that the keys are not stored in the image
