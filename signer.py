@@ -44,7 +44,6 @@ def convert_links_to_images(html_content):
                 continue
 
             img_tag = f'<img src="{base64_string}">'
-            # Replace the <svg> tag with the <img> tag
             svg_tag.replace_with(BeautifulSoup(img_tag, 'html.parser'))
 
     return str(soup)
@@ -174,9 +173,15 @@ class Signer:
         # Replace '\n' with '<br>
         # text_signature = text_signature.replace('\n', '<br>\n')
         verifications = self.inject_rsa_signature("I'm a developer.")
+        misc_fields = {
+            "jp_name": "ヘゲティス・ジョシュア",
+            "jp_role": "開発者",
+        }
         all_fields = create_fields('Joshua Hegedus', 'josh.hegedus@outlook.com', 'Developer')
         all_fields.update(verifications)
+        all_fields.update(misc_fields)
         text_signature = fill_template(self.__signature_file, **all_fields)
+        text_signature = combine_template_with_styles(text_signature, ['txt-styles.css'])
 
         pyperclip.copy(text_signature)
         print(text_signature)
