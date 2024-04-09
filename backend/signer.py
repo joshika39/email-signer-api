@@ -13,9 +13,10 @@ from enum import Enum
 
 path_root = Path(__file__).parents[1]
 sys.path.append(os.path.join(path_root))
+sys.path.append(os.path.join(path_root, 'email'))
 
 from rsa import RSA
-rsa = RSA()
+rsa = RSA("jhegedus9@gmail.com")
 
 use_encryption = True
 

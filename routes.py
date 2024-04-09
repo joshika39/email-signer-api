@@ -3,14 +3,13 @@ from pathlib import Path
 import sys
 import os
 from pydantic import BaseModel
-import uvicorn
 
 path_root = Path(__file__).parents[1]
 sys.path.append(os.path.join(path_root))
 sys.path.append(os.path.join(path_root, 'email'))
 
+from email.signer import Signer, SignatureType, SMTPConfig
 from email.rsa import RSA
-from email.signer import Signer, SMTPConfig, SignatureType
 
 router = APIRouter()
 
@@ -59,18 +58,3 @@ def send_email(send_model: SendModel):
 
     signer.send_email(recipient_email, subject, message_body)
     return {"sent": True}
-
-
-if __name__ == "__main__":
-    from fastapi import FastAPI
-
-    app = FastAPI(
-        title="Email Integrity Verification",
-        description="This API is used to verify the integrity of an email address.",
-        version="1.0.0"
-    )
-
-    app.include_router(router)
-
-    uvicorn.run(app, host="
-
