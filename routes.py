@@ -127,16 +127,17 @@ def verify_email_get_japanese(email: str, ps_message: str, ps_signature: str):
             }
         }
     except Exception as e:
+        print(f"Error verifying email: {e}")
         return {
             "email": email,
             "ps_message": ps_message,
             "signature": {
-                'status': 'error',
+                'status': 'error/invalid',
                 "ps": ps_signature,
             },
             "comment": {
-                "jp": "エラーが発生しました。" + str(e),
-                "en": "An error occurred: " + str(e)
+                "en": "An error occurred. The email most likely is invalid.",
+                "jp": "エラーが発生しました。おそらく電子メールは無効です。"
             }
         }
 
