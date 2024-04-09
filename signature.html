@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Signature</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- STYLES -->
+</head>
+<body>
+    <div class="signature-container {{ verified }}">
+    <a id="verified" title="{{ verified_title }}" href="https://ablaze.one/" target="_blank">
+        <img class="hoverable" src="assets/verified.png" alt="Verified badge">
+    </a>
+    <div class="header-wrapper">
+        <div class="sender">
+            <img class="avatar" src="https://avatars.githubusercontent.com/u/72213809?s=60&v=4" alt="Ablaze avatar">
+            <div class="name-role">
+                {{ name }}<br>
+                {{ role }}, Ablaze
+            </div>
+        </div>
+    </div>
+    <img class="visible-light" src="https://ablaze.one/img/ablaze_logo_v2/dark.svg" alt="Ablaze logo"
+         style="max-width: 200px;">
+    <img class="visible-dark" src="https://ablaze.one/img/ablaze_logo_v2/light.svg" alt="Ablaze logo"
+         style="max-width: 200px;">
+    <div class="details-wrapper">
+        <div class="details">
+            <a href="https://ablaze.one">ablaze.one</a><span class="v-hr"></span>
+            <p>{{ email }}</p><span class="v-hr"></span>
+            <p>Japan</p>
+        </div>
+    </div>
+    <div class="separator"></div>
+    <a class="btn convert-to-image" href="https://github.com/sponsors/Ablaze-MIRAI" rel="noopener" target="_blank"
+       aria-label="Sponsor @Ablaze-MIRAI on GitHub">
+        <img src="assets/heart.png" ALT="Sponsor heart">&nbsp;<span>Sponsor Us on GitHub!</span>
+    </a>
+</div>
+</body>
+</html>
