@@ -45,8 +45,8 @@ signer = Signer(
     user_config,
     SMTPConfig(),
     os.path.join('backend', 'email.html'),
-    SignatureType.SIMPLE,
-    SELF_URL
+    SELF_URL,
+    SignatureType.SIMPLE
 )
 
 signer.send_email(email)

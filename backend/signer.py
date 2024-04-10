@@ -11,6 +11,7 @@ import base64
 from pathlib import Path
 import sys
 from enum import Enum
+from dotenv import load_dotenv
 
 path_root = Path(__file__).parents[1]
 sys.path.append(os.path.join(path_root))
@@ -18,8 +19,9 @@ sys.path.append(os.path.join(path_root, 'backend'))
 
 from rsa import RSA
 
-
+load_dotenv()
 use_encryption = True
+ENV = os.getenv('ENV') or 'dev'
 
 
 def convert_links_to_images(html_content):
@@ -151,8 +153,17 @@ def is_message_body_base64(message_body: str):
     return message_body.startswith("base64:")
 
 
-def get_signature_ps_element(data: str):
-    return f'<p><i>This was used to sign the email: <u>{data}</u></i></p>'
+def obfuscate_email_in_str(data: str, email: str):
+    """
+    Obfuscate the email address by adding the &#173; entity before the domain (.com, .org, etc.).
+    """
+    formatted_email = email.replace('@', '&#173;@')
+    formatted_email = formatted_email.replace('.', '&#173;.')
+    return data.replace(email, formatted_email)
+
+
+def get_signature_ps_element(data: str, email: str):
+    return f'<p><i>This was used to sign the email: <u>{obfuscate_email_in_str(data, email)}</u></i></p>'
 
 
 class EmailConfig:
@@ -257,7 +268,7 @@ class Signer:
 
         obj = {
             'EMAIL_CONTENT': body,
-            'PS': get_signature_ps_element(verifications['data'])
+            'PS': get_signature_ps_element(verifications['data'], self.__user.email)
         }
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
@@ -276,7 +287,7 @@ class Signer:
 
         email_structure = {
             'EMAIL_CONTENT': body,
-            'PS': get_signature_ps_element(verifications['data']),
+            'PS': get_signature_ps_element(verifications['data'], self.__user.email),
             'SIGNATURE': simple_template_content
         }
 
@@ -331,10 +342,16 @@ class Signer:
                 signature = self.__generate_simple_signature(email.message_body)
 
             html_content = clean_up_html(signature.content)
+            if ENV == 'dev':
+                pyperclip.copy(html_content)
             msg.attach(MIMEText(html_content, 'html'))
             print("Sending email...")
             recipients = email.combine_recipients()
-            server.sendmail(self.__user.email, recipients, msg.as_string())
+            if ENV == 'test' or ENV == 'prod':
+                server.sendmail(self.__user.email, recipients, msg.as_string())
+            else:
+                print(f"Recipients: {recipients}")
+                print("Email not sent because the environment is not prod or test.")
             print("Email sent successfully!")
         except Exception as e:
             print(f"Failed to send email. Error: {str(e)}")
