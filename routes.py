@@ -142,7 +142,6 @@ def verify_email_get_japanese(email: str, ps_message: str, ps_signature: str):
         }
 
 
-
 @router.post("/verify/key")
 def verify_key(verify_model: KeyVerifyModel):
     result = verify_by_base64_key(verify_model.base64_key, verify_model.ps_message, verify_model.ps_signature)
@@ -156,7 +155,7 @@ def verify_key(verify_model: KeyVerifyModel):
 def send_email(provider: str, send_model: SendModel):
     if provider not in ['gmail', 'outlook']:
         return {"error": "Invalid provider"}
-    server = 'smtp.gmail.com' if provider == 'gmail' else 'smtp.office365.com'
+    server = 'smtp.gmail.com' if provider == 'gmail' else 'smtp-mail.outlook.com'
     user_config = UserConfig(
         send_model.name,
         send_model.email,
