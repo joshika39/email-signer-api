@@ -1,18 +1,40 @@
-<p class="name-role has-subtext">{{ main_name }}、{{ main_role }}</p>
-<p class="subtext">{{ latin_name }}, {{ latin_role }}<p>
+<div>
+    <p class="closing-word has-subtext">厚く御礼申し上げます。</p>
+    <p class="closing-word subtext">All the Best,</p>
+</div>
+<div class="wrapper">
+    <div class="left">
+        <p class="name-role has-subtext">{{ main_name }}、{{ main_role }}</p>
+        <p class="subtext">{{ latin_name }}, {{ latin_role }}
+        <p>{{ email }} | 日本 (Japan)</p>
+    </div>
+    <span class="vertical-line"></span> <!-- Added this line to separate the left and right divs -->
+    <div class="right">
+        <p><a class="logo" href="https://ablaze.one">
+            <img src="https://assets.kou-gen.net/logo_dark.png" alt="Ablaze Logo">
+        </a></p>
+        <a href="https://github.com/sponsors/Ablaze-MIRAI/">
+            <img id="support-us" src="https://assets.kou-gen.net/support-us.png" alt="Support us on GitHub!">
+        </a>
+    </div>
+</div>
 
-<a class="logo" href="https://ablaze.one">
-    <img src="https://assets.kou-gen.net/logo_dark.png" alt="Ablaze Logo">
-</a>
+<div id="env-notice" class="wrapper v-centered">
+    <img id="recycle" src="https://assets.kou-gen.net/recycle.png" alt="Look after the environment">
+    <div>
+        <p class="comment">このメールを印刷する前に環境に配慮してください。</p>
+        <p class="comment">Please consider the environment before printing this email.</p>
+    </div>
+</div>
 
-<p>{{ email }} | 日本 (Japan)</p>
-
-<a href="https://github.com/sponsors/Ablaze-MIRAI/">
-    <img id="support-us" src="https://assets.kou-gen.net/support-us.png" alt="Support us on GitHub!">
-</a>
 
 <hr>
 
-<p class="has-subtext"><a href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}" title="{{ verified_title }}">このメールはデジタル署名されました</a>
+<p class="has-subtext"><a
+        href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}"
+        title="{{ verified_title }}">このメールはデジタル署名されました</a>
 </p>
-<p class="subtext"><a href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}" title="{{ verified_title }}">This email is digitally signed</a>
+<p class="subtext"><a
+        href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}"
+        title="{{ verified_title }}">This email is digitally signed</a>
+</p>

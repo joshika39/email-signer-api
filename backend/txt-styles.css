@@ -3,6 +3,27 @@
     --secondary-color: #f95f12;
 }
 
+.wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 10px
+}
+
+.wrapper.v-centered {
+    align-items: center;
+    align-content: center;
+}
+
+#env-notice {
+    margin-top: 5px;
+}
+
+#recycle {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
 .name-role {
     font-weight: bold;
     font-size: 18px;
@@ -11,6 +32,13 @@
 
 .has-subtext {
     margin-bottom: 0;
+}
+
+.comment {
+    font-style: italic;
+    font-size: 14px;
+    color: gray;
+    margin: 0;
 }
 
 /*  This is the latin type of the japanese name above
@@ -22,8 +50,18 @@
     margin-top: 0;
 }
 
+.closing-word {
+    font-style: italic;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+.subtext.closing-word {
+    font-size: 18px;
+}
+
 h1, h2, h3, h4, h5, h6 {
-    color: var(--primary-color);
+    color: var(--secondary-color);
 }
 
 .logo {
@@ -42,6 +80,11 @@ h1, h2, h3, h4, h5, h6 {
 
 #support-us {
     width: 160px;
+}
+
+.vertical-line {
+    border: 1px solid #000000;
+    margin: 0 20px;
 }
 
 
