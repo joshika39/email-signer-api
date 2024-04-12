@@ -209,6 +209,13 @@ class EmailConfig:
         return all_recipients
 
 
+class SignerResponse:
+    def __init__(self, success: bool, response: str | None, error: str):
+        self.success = success
+        self.response = response
+        self.error = error
+
+
 class UserConfig:
     def __init__(self, name: str, email: str, password: str, role: str, latin_name: str, latin_role: str, **kwargs):
         self.name = name
@@ -310,12 +317,12 @@ class Signer:
 
         return Signature(text_signature, verifications['data'])
 
-    def send_email(self, email: EmailConfig) -> str | None:
+    def send_email(self, email: EmailConfig) -> SignerResponse:
         try:
             server = self.__smtp_config.get_smtp_server()
         except Exception as e:
             print(f"Failed to connect to SMTP server. Error: {str(e)}")
-            return str(e)
+            return SignerResponse(False, None, str(e))
 
         try:
             server.login(self.__user.email, self.__user.password)
@@ -359,9 +366,10 @@ class Signer:
                 print(f"Recipients: {recipients}")
                 print("Email not sent because the environment is not prod or test.")
             print("Email sent successfully!")
+            return SignerResponse(True, "Email sent successfully!", "")
         except Exception as e:
             print(f"Failed to send email. Error: {str(e)}")
-            return str(e)
+            return SignerResponse(False, None, str(e))
         finally:
             # Close the connection to the SMTP server
             server.quit()
