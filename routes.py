@@ -59,6 +59,7 @@ class SendModel(BaseModel):
     bcc: Optional[str | list[str]] = None
     subject: str
     message_body: str
+    reply_to: Optional[str] = None
 
 
 def convert_recipients(recipients):
@@ -175,7 +176,8 @@ def send_email(provider: str, send_model: SendModel):
         message_body,
         [recipients] if isinstance(recipients, str) else recipients,
         [cc] if isinstance(cc, str) else cc,
-        [bcc] if isinstance(bcc, str) else bcc
+        [bcc] if isinstance(bcc, str) else bcc,
+        send_model.reply_to
     )
 
     if not email_config.is_valid():

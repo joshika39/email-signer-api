@@ -173,12 +173,14 @@ class EmailConfig:
         message_body: str,
         recipients: list[str] = None,
         cc: list[str] = None,
-        bcc: list[str] = None
+        bcc: list[str] = None,
+        reply_to: str = None,
     ):
         self.subject = subject
         self.recipients = recipients
         self.cc = cc
         self.bcc = bcc
+        self.reply_to = reply_to
         if is_message_body_base64(message_body):
             self.message_body = base64.b64decode(message_body.replace("base64:","")).decode('utf-8')
         else:
@@ -335,6 +337,10 @@ class Signer:
                 msg['Bcc'] = email.get_bcc_string()
             else:
                 msg['Bcc'] = ""
+
+            if email.reply_to:
+                msg.add_header('In-Reply-To', email.reply_to)
+                msg.add_header('References', email.reply_to)
 
             if self.__signature_type == SignatureType.COMPLEX:
                 signature = self.__generate_complex_signature(email.message_body)
