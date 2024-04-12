@@ -2,7 +2,8 @@ from pathlib import Path
 from fastapi import FastAPI
 import sys
 import os
-import uvicorn  
+import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 path_root = Path(__file__).parents[1]
 email_path = os.path.join(path_root, 'email')
@@ -16,6 +17,14 @@ app = FastAPI(
     title="Email Integrity Verification",
     description="This API is used to verify the integrity of an email address.",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(router)
