@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 COPY routes.py .
+COPY static/favicon.ico static/
 COPY backend/*.py backend/
 COPY backend/*.html backend/
 COPY backend/*.css backend/
