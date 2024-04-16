@@ -77,15 +77,17 @@ def verify_by_email(email: str, ps_message: str, ps_signature: str) -> bool:
 
 @router.get("/")
 def read_root():
-    return { "message": "Hello World" }
+    return {"message": "Hello World"}
 
 
 @router.get("/key")
 def get_public_key(user_email: str):
-    rsa = RSA(user_email)
-    key_str = rsa.get_public_key()
-    base64_str = base64.b64encode(key_str).decode()
-    return {"public_key": base64_str}
+    try:
+        rsa = RSA(user_email)
+        key_str = rsa.get_public_key()
+        return {"public_key": key_str}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @router.post("/verify/email")
