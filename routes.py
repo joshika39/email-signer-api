@@ -196,8 +196,6 @@ def send_email(provider: str, send_model: SendModel):
 
     result = signer.send_email(email_config)
     if result.success:
-        print(f"Email sent: {result.response}")
         return {"sent": True, "message": result.response}
 
-    print(f"Error sending email: {result.error}")
     return {"sent": False, "error": result.error}
