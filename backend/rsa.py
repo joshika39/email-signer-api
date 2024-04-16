@@ -4,16 +4,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 import os
 import base64
 
-
-def get_secret_key_path(email: str):
-    sender_email = email.replace("@", "").replace(".", "")
-    filename = f"{sender_email}.pem"
-    secret_key_path = os.path.join("keys", "private", filename)
-    if not os.path.exists(secret_key_path):
-        os.makedirs(os.path.dirname(secret_key_path), exist_ok=True)
-    return secret_key_path
-
-
 def verify_by_base64_key(base64_key: str, ps_message: str, ps_signature: str) -> bool:
     public_key = serialization.load_pem_public_key(
         base64.b64decode(base64_key),
@@ -37,8 +27,26 @@ def verify_by_base64_key(base64_key: str, ps_message: str, ps_signature: str) ->
 
 
 class RSA:
+
+    @staticmethod
+    def email_to_filename(email: str):
+        return email.replace("@", "").replace(".", "")
+
+    @staticmethod
+    def get_secret_key_path(email: str):
+        filename = RSA.email_to_filename(email)
+        secret_key_path = os.path.join("keys", "private", f"{filename}.pem")
+        if not os.path.exists(secret_key_path):
+            os.makedirs(os.path.dirname(secret_key_path), exist_ok=True)
+        return secret_key_path
+
+    @staticmethod
+    def is_user_key_present(email: str):
+        private_key_path = RSA.get_secret_key_path(email)
+        return os.path.exists(private_key_path)
+
     def __init__(self, sender_email: str):
-        private_key_path = get_secret_key_path(sender_email)
+        private_key_path = RSA.get_secret_key_path(sender_email)
         if os.path.exists(private_key_path):
             print("Loading private key from file")
             with open(private_key_path, "rb") as f:

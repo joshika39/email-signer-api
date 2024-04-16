@@ -83,11 +83,14 @@ def read_root():
 @router.get("/key")
 def get_public_key(user_email: str):
     try:
+        if not RSA.is_user_key_present(user_email):
+            return {"status": "notfound", "error": "No key found for user"}
+
         rsa = RSA(user_email)
         key_str = rsa.get_public_key()
-        return {"public_key": key_str}
+        return {"status": "ok", "public_key": key_str}
     except Exception as e:
-        return {"error": str(e)}
+        return {"status": "error", "error": str(e)}
 
 
 @router.post("/verify/email")
