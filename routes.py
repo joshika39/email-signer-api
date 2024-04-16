@@ -155,6 +155,7 @@ def verify_key(verify_model: KeyVerifyModel):
 @router.post("/send/{provider}")
 def send_email(provider: str, send_model: SendModel):
     if provider not in ['gmail', 'outlook']:
+        print(f"Invalid provider: {provider}")
         return {"error": "Invalid provider"}
     server = 'smtp.gmail.com' if provider == 'gmail' else 'smtp-mail.outlook.com'
     user_config = UserConfig(
@@ -181,6 +182,7 @@ def send_email(provider: str, send_model: SendModel):
     )
 
     if not email_config.is_valid():
+        print(f"Invalid email configuration: {email_config}")
         return {"error": "Invalid email configuration"}
 
     smp_config = SMTPConfig(server, 587)
@@ -194,6 +196,8 @@ def send_email(provider: str, send_model: SendModel):
 
     result = signer.send_email(email_config)
     if result.success:
+        print(f"Email sent: {result.response}")
         return {"sent": True, "message": result.response}
 
+    print(f"Error sending email: {result.error}")
     return {"sent": False, "error": result.error}
