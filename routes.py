@@ -84,13 +84,13 @@ def read_root():
 def get_public_key(user_email: str):
     try:
         if not RSA.is_user_key_present(user_email):
-            return {"status": "notfound", "error": "No key found for user"}
+            return {"status": "notfound", "error": "No key found for user", "public_key": ""}
 
         rsa = RSA(user_email)
         key_str = rsa.get_public_key()
-        return {"status": "ok", "public_key": key_str}
+        return {"status": "ok", "public_key": key_str, "error": ""}
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        return {"status": "error", "error": str(e), "public_key": ""}
 
 
 @router.post("/verify/email")
@@ -103,7 +103,7 @@ def verify_email(verify_model: EmailVerifyModel):
 
 
 @router.get("/verify/email")
-def verify_email_get_japanese(email: str, ps_message: str, ps_signature: str):
+def verify_email(email: str, ps_message: str, ps_signature: str):
     try:
         result = verify_by_email(email, ps_message, ps_signature)
         if result:
