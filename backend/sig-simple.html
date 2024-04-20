@@ -32,7 +32,8 @@
 <hr>
 
 <p class="has-subtext"><a
-        href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}"
+        target="_blank"
+        href="{{ verify_url }}/email/verify?email={{ email }}&message={{ sig_message }}&signature={{ signature }}"
         title="{{ verified_title }}">このメールはデジタル署名されました</a>
 </p>
 <p class="subtext"><i>これを使ってメールを署名しました:
@@ -40,7 +41,8 @@
 </i></p>
 
 <p class="has-subtext"><a
-        href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}"
+        target="_blank"
+        href="{{ verify_url }}/email/verify?email={{ email }}&message={{ sig_message }}&signature={{ signature }}"
         title="{{ verified_title }}">This email is digitally signed</a>
 </p>
 <p class="subtext"><i>This was used to sign the email:
