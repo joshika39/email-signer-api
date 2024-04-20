@@ -44,7 +44,7 @@ email = EmailConfig(
 
 signer = Signer(
     user_config,
-    SMTPConfig(smtp_server='smtp-mail.outlook.com'),
+    SMTPConfig(smtp_server='smtp.office365.com'),
     os.path.join('backend', 'email.html'),
     FRONTEND_URL,
     SignatureType.SIMPLE

@@ -163,7 +163,7 @@ def send_email(provider: str, send_model: SendModel):
     if provider not in ['gmail', 'outlook']:
         print(f"Invalid provider: {provider}")
         return {"error": "Invalid provider"}
-    server = 'smtp.gmail.com' if provider == 'gmail' else 'smtp-mail.outlook.com'
+    server = 'smtp.gmail.com' if provider == 'gmail' else 'smtp.office365.com'
     user_config = UserConfig(
         send_model.name,
         send_model.email,
