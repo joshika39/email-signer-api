@@ -58,6 +58,7 @@ def clean_up_html(html_content):
     print("Cleaning up HTML content...")
     remove_strings = [
         '<link rel="stylesheet" href="txt-styles.css">',
+        '<meta charset="utf-8">',
     ]
     for remove_string in remove_strings:
         html_content = html_content.replace(remove_string, "")
@@ -162,10 +163,6 @@ def obfuscate_email_in_str(data: str, email: str):
     return data.replace(email, formatted_email)
 
 
-def get_signature_ps_element(data: str, email: str):
-    return f'<p><i>This was used to sign the email: <u>{obfuscate_email_in_str(data, email)}</u></i></p>'
-
-
 class EmailConfig:
     def __init__(
         self,
@@ -256,28 +253,27 @@ class Signer:
 
         if use_encryption:
             mail_id = str(uuid4())
-            data = f"{self.__user.email} {datetime.datetime.now()} {funny_quote}"
+            end = f' {funny_quote}' if funny_quote else ''
+            data = f"{self.__user.email} {datetime.datetime.now()}{end}"
             signature = self.__rsa.create_signed_message(data)
             return {
                 'verified_title': signature,
                 'verified_href': mail_id,
                 'verified': '.verified',
-                'data': data
+                'sig_message': data,
             }
         else:
             return {
                 'verified_title': '',
                 'verified_href': '',
                 'verified': '.not-verified',
-                'data': ''
             }
 
     def __generate_complex_signature(self, body: str) -> Signature:
-        verifications = self.inject_rsa_signature("I'm a developer.")
+        verifications = self.inject_rsa_signature()
 
         obj = {
             'EMAIL_CONTENT': body,
-            'PS': get_signature_ps_element(verifications['data'], self.__user.email)
         }
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
@@ -289,14 +285,13 @@ class Signer:
         return Signature(template, verifications['data'])
 
     def __generate_simple_signature(self, body: str) -> Signature:
-        verifications = self.inject_rsa_signature("I'm a developer.")
+        verifications = self.inject_rsa_signature()
         simple_template = os.path.join('backend', 'sig-simple.html')
         with open(simple_template, 'r') as f:
             simple_template_content = f.read()
 
         email_structure = {
             'EMAIL_CONTENT': body,
-            'PS': get_signature_ps_element(verifications['data'], self.__user.email),
             'SIGNATURE': simple_template_content
         }
 
@@ -306,7 +301,7 @@ class Signer:
             "latin_name": self.__user.latin_name,
             "latin_role": self.__user.latin_role,
             'signature': verifications['verified_title'],
-            'message': verifications['data'],
+            'sig_message': verifications['sig_message'],
             'self_url': self.__self_url
         }
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
@@ -315,7 +310,7 @@ class Signer:
         text_signature = fill_template_str(template, **all_fields)
         text_signature = combine_template_with_styles(text_signature, [os.path.join('backend', 'txt-styles.css')])
 
-        return Signature(text_signature, verifications['data'])
+        return Signature(text_signature, verifications['sig_message'])
 
     def send_email(self, email: EmailConfig) -> SignerResponse:
         try:
