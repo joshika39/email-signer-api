@@ -12,9 +12,10 @@ load_dotenv()
 
 ENV = os.getenv("ENV", "development")
 SELF_URL = os.getenv('SELF_URL')
+FRONTEND_URL = os.getenv('FRONTEND_URL')
 
-if not SELF_URL:
-    raise ValueError('SELF_URL not found in .env file')
+if not SELF_URL or not FRONTEND_URL:
+    raise ValueError('SELF_URL or FRONTEND_URL not found in .env file')
 
 if ENV == "development":
     path_root = Path(__file__).parents[1]
@@ -195,7 +196,7 @@ def send_email(provider: str, send_model: SendModel):
         user_config,
         smp_config,
         os.path.join('backend', 'email.html'),
-        SELF_URL,
+        FRONTEND_URL,
         SignatureType.SIMPLE
     )
 
