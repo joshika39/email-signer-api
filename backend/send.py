@@ -14,6 +14,7 @@ load_dotenv()
 
 PASSWORD = os.getenv('PASS')
 SELF_URL = os.getenv('SELF_URL')
+FRONTEND_URL = os.getenv('FRONTEND_URL')
 
 if not SELF_URL:
     raise ValueError('SELF_URL not found in .env file')
@@ -27,7 +28,7 @@ def convert_to_base64(message: str):
 
 user_config = UserConfig(
     'ヘゲディス・ジョシュア',
-    'jhegedus9@gmail.com',
+    'josh.hegedus@outlook.com',
     PASSWORD,
     '開発者',
     'Joshua Hegedus',
@@ -43,9 +44,9 @@ email = EmailConfig(
 
 signer = Signer(
     user_config,
-    SMTPConfig(),
+    SMTPConfig(smtp_server='smtp-mail.outlook.com'),
     os.path.join('backend', 'email.html'),
-    SELF_URL,
+    FRONTEND_URL,
     SignatureType.SIMPLE
 )
 
