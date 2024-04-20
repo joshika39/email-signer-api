@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="txt-styles.css" type="text/css">
+<meta charset="UTF-8">
 <div>
     <p class="closing-word has-subtext">厚く御礼申し上げます。</p>
     <p class="closing-word subtext">All the Best,</p>
@@ -27,14 +29,20 @@
     </div>
 </div>
 
-
 <hr>
 
 <p class="has-subtext"><a
         href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}"
         title="{{ verified_title }}">このメールはデジタル署名されました</a>
 </p>
-<p class="subtext"><a
+<p class="subtext"><i>これを使ってメールを署名しました:
+    <b>{{ sig_message }}</b>
+</i></p>
+
+<p class="has-subtext"><a
         href="{{ self_url }}/verify/email?email={{ email }}&ps_message={{ message }}&ps_signature={{ signature }}"
         title="{{ verified_title }}">This email is digitally signed</a>
 </p>
+<p class="subtext"><i>This was used to sign the email:
+    <b>{{ sig_message }}</b>
+</i></p>
