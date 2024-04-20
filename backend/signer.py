@@ -236,7 +236,7 @@ class Signer:
         user: UserConfig,
         smtp_config: SMTPConfig,
         signature_file: str,
-        self_url: str,
+        verify_url: str,
         signature_type: SignatureType = SignatureType.SIMPLE,
     ):
         self.__smtp_config = smtp_config
@@ -244,7 +244,7 @@ class Signer:
         self.__signature_type = signature_type
         self.__user = user
         self.__rsa = RSA(user.email)
-        self.__self_url = self_url
+        self.__verify_url = verify_url
 
     def inject_rsa_signature(self, funny_quote: str = ""):
         """
@@ -284,7 +284,7 @@ class Signer:
 
         return Signature(template, verifications['data'])
 
-    def __generate_simple_signature(self, body: str) -> Signature:
+    def __generate_simple_signature(self, body: str, subject: str) -> Signature:
         verifications = self.inject_rsa_signature()
         simple_template = os.path.join('backend', 'sig-simple.html')
         with open(simple_template, 'r') as f:
@@ -302,7 +302,8 @@ class Signer:
             "latin_role": self.__user.latin_role,
             'signature': verifications['verified_title'],
             'sig_message': verifications['sig_message'],
-            'self_url': self.__self_url
+            'verify_url': self.__verify_url,
+            'subject': subject
         }
         all_fields = create_fields(self.__user.name, self.__user.email, self.__user.role)
         all_fields.update(verifications)
@@ -347,7 +348,7 @@ class Signer:
             if self.__signature_type == SignatureType.COMPLEX:
                 signature = self.__generate_complex_signature(email.message_body)
             else:
-                signature = self.__generate_simple_signature(email.message_body)
+                signature = self.__generate_simple_signature(email.message_body, email.subject)
 
             html_content = clean_up_html(signature.content)
             if ENV == 'dev':
