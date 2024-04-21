@@ -36,7 +36,7 @@
         href="{{ verify_url }}/email/verify?email={{ email }}&message={{ sig_message }}&signature={{ signature }}"
         title="{{ verified_title }}">このメールはデジタル署名されました</a>
 </p>
-<p class="subtext"><i>これを使ってメールを署名しました:
+<p class="subtext"><i>署名メッセージ:
     <b>{{ sig_message }}</b>
 </i></p>
 
@@ -45,6 +45,6 @@
         href="{{ verify_url }}/email/verify?email={{ email }}&message={{ sig_message }}&signature={{ signature }}"
         title="{{ verified_title }}">This email is digitally signed</a>
 </p>
-<p class="subtext"><i>This was used to sign the email:
+<p class="subtext"><i>Signature message:
     <b>{{ sig_message }}</b>
 </i></p>
