@@ -1,4 +1,5 @@
 import smtplib
+import urllib.parse
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import pyperclip
@@ -163,6 +164,13 @@ def obfuscate_email_in_str(data: str, email: str):
     return data.replace(email, formatted_email)
 
 
+def atou(b64: str, has_prefix=True):
+    formatted = b64.replace("base64:", "") if has_prefix else b64
+    decoded_bytes = base64.b64decode(formatted)
+    decoded_string = urllib.parse.unquote(decoded_bytes.decode('utf-8'))
+    return decoded_string
+
+
 class EmailConfig:
     def __init__(
             self,
@@ -178,10 +186,7 @@ class EmailConfig:
         self.cc = cc
         self.bcc = bcc
         self.reply_to = reply_to
-        if is_message_body_base64(message_body):
-            self.message_body = base64.b64decode(message_body.replace("base64:", "")).decode('utf-8')
-        else:
-            self.message_body = message_body
+        self.message_body = atou(message_body, is_message_body_base64(message_body))
 
     def is_valid(self):
         return self.subject and self.message_body and (self.recipients or self.cc or self.bcc)
@@ -225,9 +230,11 @@ class UserConfig:
 
 
 class Signature:
-    def __init__(self, content: str, signed_content: str):
+    def __init__(self, content: str, signed_content: str, rsa_signature: str, email: str):
         self.content = content
         self.signed_content = signed_content
+        self.rsa_signature = rsa_signature
+        self.email = email
 
 
 class Signer:
@@ -282,7 +289,7 @@ class Signer:
         template = convert_links_to_images(template)
         template = combine_template_with_styles(template, [os.path.join('backend', 'styles.css')])
 
-        return Signature(template, verifications['data'])
+        return Signature(template, verifications['data'], verifications['verified_title'], self.__user.email)
 
     def __generate_simple_signature(self, body: str, subject: str) -> Signature:
         verifications = self.inject_rsa_signature()
@@ -311,7 +318,8 @@ class Signer:
         text_signature = fill_template_str(template, **all_fields)
         text_signature = combine_template_with_styles(text_signature, [os.path.join('backend', 'txt-styles.css')])
 
-        return Signature(text_signature, verifications['sig_message'])
+        return Signature(text_signature, verifications['sig_message'], verifications['verified_title'],
+                         self.__user.email)
 
     def send_email(self, email: EmailConfig) -> SignerResponse:
         try:
@@ -353,6 +361,10 @@ class Signer:
             html_content = clean_up_html(signature.content)
             if ENV == 'dev':
                 pyperclip.copy(html_content)
+                # Test back the verification
+                print(f"Verification: {signature.signed_content}")
+                rsa = RSA(signature.email)
+                print(f"Verification result: {rsa.verify(signature.rsa_signature, signature.signed_content)}")
             msg.attach(MIMEText(html_content, 'html'))
             print("Sending email...")
             recipients = email.combine_recipients()

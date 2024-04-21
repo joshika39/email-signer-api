@@ -200,6 +200,12 @@ def send_email(provider: str, send_model: SendModel):
         SignatureType.SIMPLE
     )
 
+    if ENV == "dev":
+        print("Development mode")
+        print("Message: ", email_config.message_body)
+        print(f"Sending email: {email_config}")
+        return {"sent": True, "message": "TEST Email sent"}
+
     result = signer.send_email(email_config)
     if result.success:
         return {"sent": True, "message": result.response}
