@@ -165,13 +165,13 @@ def obfuscate_email_in_str(data: str, email: str):
 
 class EmailConfig:
     def __init__(
-        self,
-        subject: str,
-        message_body: str,
-        recipients: list[str] = None,
-        cc: list[str] = None,
-        bcc: list[str] = None,
-        reply_to: str = None,
+            self,
+            subject: str,
+            message_body: str,
+            recipients: list[str] = None,
+            cc: list[str] = None,
+            bcc: list[str] = None,
+            reply_to: str = None,
     ):
         self.subject = subject
         self.recipients = recipients
@@ -179,7 +179,7 @@ class EmailConfig:
         self.bcc = bcc
         self.reply_to = reply_to
         if is_message_body_base64(message_body):
-            self.message_body = base64.b64decode(message_body.replace("base64:","")).decode('utf-8')
+            self.message_body = base64.b64decode(message_body.replace("base64:", "")).decode('utf-8')
         else:
             self.message_body = message_body
 
@@ -232,12 +232,12 @@ class Signature:
 
 class Signer:
     def __init__(
-        self,
-        user: UserConfig,
-        smtp_config: SMTPConfig,
-        signature_file: str,
-        verify_url: str,
-        signature_type: SignatureType = SignatureType.SIMPLE,
+            self,
+            user: UserConfig,
+            smtp_config: SMTPConfig,
+            signature_file: str,
+            verify_url: str,
+            signature_type: SignatureType = SignatureType.SIMPLE,
     ):
         self.__smtp_config = smtp_config
         self.__signature_file = signature_file
@@ -254,7 +254,7 @@ class Signer:
         if use_encryption:
             mail_id = str(uuid4())
             end = f' {funny_quote}' if funny_quote else ''
-            data = f"{obfuscate_email_in_str(self.__user.email)} {datetime.datetime.now()}{end}"
+            data = obfuscate_email_in_str(f"{self.__user.email} {datetime.datetime.now()}{end}", self.__user.email)
             signature = self.__rsa.create_signed_message(data)
             return {
                 'verified_title': signature,
