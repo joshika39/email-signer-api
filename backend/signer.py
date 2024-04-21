@@ -254,7 +254,7 @@ class Signer:
         if use_encryption:
             mail_id = str(uuid4())
             end = f' {funny_quote}' if funny_quote else ''
-            data = f"{self.__user.email} {datetime.datetime.now()}{end}"
+            data = f"{obfuscate_email_in_str(self.__user.email)} {datetime.datetime.now()}{end}"
             signature = self.__rsa.create_signed_message(data)
             return {
                 'verified_title': signature,
