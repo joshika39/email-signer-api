@@ -323,6 +323,21 @@ class Signer:
                          self.__user.email)
 
     def send_email(self, email: EmailConfig) -> SignerResponse:
+        if self.__signature_type == SignatureType.COMPLEX:
+            signature = self.__generate_complex_signature(email.message_body)
+        else:
+            signature = self.__generate_simple_signature(email.message_body, email.subject)
+
+        html_content = clean_up_html(signature.content)
+        if ENV == 'dev':
+            pyperclip.copy(html_content)
+            # Test back the verification
+            print(f"Verification: {signature.signed_content}")
+            rsa = RSA(signature.email)
+            print(f"Verification result: {rsa.verify(signature.rsa_signature, signature.signed_content)}")
+            print("Stopping execution because the environment is dev.")
+            return SignerResponse(True, "Email sent successfully!", "")
+
         try:
             server = self.__smtp_config.get_smtp_server()
         except Exception as e:
@@ -354,18 +369,6 @@ class Signer:
                 msg.add_header('In-Reply-To', email.reply_to)
                 msg.add_header('References', email.reply_to)
 
-            if self.__signature_type == SignatureType.COMPLEX:
-                signature = self.__generate_complex_signature(email.message_body)
-            else:
-                signature = self.__generate_simple_signature(email.message_body, email.subject)
-
-            html_content = clean_up_html(signature.content)
-            if ENV == 'dev':
-                pyperclip.copy(html_content)
-                # Test back the verification
-                print(f"Verification: {signature.signed_content}")
-                rsa = RSA(signature.email)
-                print(f"Verification result: {rsa.verify(signature.rsa_signature, signature.signed_content)}")
             msg.attach(MIMEText(html_content, 'html'))
             print("Sending email...")
             recipients = email.combine_recipients()
